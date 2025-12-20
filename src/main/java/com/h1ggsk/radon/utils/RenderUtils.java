@@ -101,18 +101,12 @@ public final class RenderUtils {
         drawContext.state.addSimpleElement(new RoundedOutlineRenderState(drawContext.getMatrices(), drawContext.scissorStack.peekLast(), color, n, n2, n3, n4, n5, n6, n7, n8, n9, n10));
     }
 
-    public static void setScissorRegion(final int n, final int n2, final int n3, final int n4) {
-        final MinecraftClient instance = MinecraftClient.getInstance();
-        final Screen currentScreen = instance.currentScreen;
-        int n5;
-        if (instance.currentScreen == null) {
-            n5 = 0;
+    public static void setScissorRegion(DrawContext ctx, int x1, int y1, int x2, int y2, boolean enable) {
+        if (enable) {
+            ctx.enableScissor(x1, y1, x2, y2);
         } else {
-            n5 = currentScreen.height - n4;
+            ctx.disableScissor();
         }
-        final double scaleFactor = MinecraftClient.getInstance().getWindow().getScaleFactor();
-        GL11.glScissor((int) (n * scaleFactor), (int) (n5 * scaleFactor), (int) ((n3 - n) * scaleFactor), (int) ((n4 - n2) * scaleFactor));
-        GL11.glEnable(3089);
     }
 
     public static void renderCircle(final DrawContext context, final Color color, final double centerX, final double centerY, final double radius, final int resolution) {
@@ -150,25 +144,15 @@ public final class RenderUtils {
         return matrixStack;
     }
 
-    public static void renderQuad(final MatrixStack matrixStack, final float n, final float n2, final float n3, final float n4, final int n5) {
-        final float n6 = (n5 >> 24 & 0xFF) / 255.0f;
-        final float n7 = (n5 >> 16 & 0xFF) / 255.0f;
-        final float n8 = (n5 >> 8 & 0xFF) / 255.0f;
-        final float n9 = (n5 & 0xFF) / 255.0f;
-        matrixStack.push();
-        matrixStack.scale(0.5f, 0.5f, 0.5f);
-        matrixStack.translate(n, n2, 0.0);
-        final Tessellator instance = Tessellator.getInstance();
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        final BufferBuilder begin = instance.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
-        begin.vertex(0.0f, 0.0f, 0.0f).color(n7, n8, n9, n6);
-        begin.vertex(0.0f, n4, 0.0f).color(n7, n8, n9, n6);
-        begin.vertex(n3, n4, 0.0f).color(n7, n8, n9, n6);
-        begin.vertex(n3, 0.0f, 0.0f).color(n7, n8, n9, n6);
-        BufferRenderer.drawWithGlobalProgram(begin.end());
-        RenderSystem.disableBlend();
-        matrixStack.pop();
+
+    public static void renderQuad(DrawContext ctx, float x, float y, float w, float h, int argb) {
+        ctx.fill(
+                (int) x,
+                (int) y,
+                (int) (x + w),
+                (int) (y + h),
+                argb
+        );
     }
 
     public static void renderFilledBox(final MatrixStack matrixStack, final float n, final float n2, final float n3, final float n4, final float n5, final float n6, final Color color) {
